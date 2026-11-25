@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alight Motion XML Preset Downloader</title>
+  <style>
+    :root {
+      /* Tema Warna: ff0000d5 (#0000d5) & ff007aff (#007aff) + Dark */
+      --bg-dark: #05070f;
+      --bg-card: #0b1021;
+      --bg-card-hover: #101730;
+      --primary-deep: #0000d5;
+      --primary-bright: #007aff;
+      --accent-glow: rgba(0, 122, 255, 0.35);
+      --deep-glow: rgba(0, 0, 213, 0.45);
+      --text-main: #f1f5ff;
+      --text-muted: #8b99c2;
+      --border-subtle: rgba(0, 122, 255, 0.22);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(circle at 15% 15%, var(--deep-glow) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(0, 122, 255, 0.2) 0%, transparent 50%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    header {
+      padding: 36px 20px 24px;
+      text-align: center;
+      position: relative;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(0, 0, 213, 0.35), rgba(0, 122, 255, 0.2));
+      border: 1px solid var(--border-subtle);
+      color: #6ab4ff;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      box-shadow: 0 0 20px rgba(0, 122, 255, 0.15);
+    }
+
+    .badge .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary-bright);
+      box-shadow: 0 0 10px var(--primary-bright);
+      animation: pulse 1.8s infinite;
+    }
+
+    header h1 {
+      font-size: clamp(1.75rem, 4vw, 2.6rem);
+      font-weight: 800;
+      background: linear-gradient(90deg, #ffffff 10%, #5daeff 55%, #007aff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* Search & Filter Bar */
+    .controls {
+      max-width: 960px;
+      width: 100%;
+      margin: 8px auto 26px;
+      padding: 0 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 240px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 13px 16px 13px 44px;
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+
+    .search-box input:focus {
+      border-color: var(--primary-bright);
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+    }
+
+    .search-box svg {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      stroke: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .counter-pill {
+      padding: 11px 16px;
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .counter-pill span {
+      color: var(--primary-bright);
+      font-weight: 700;
+    }
+
+    /* Grid Preset */
+    main {
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+      flex: 1;
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 18px;
+    }
+
+    .preset-card {
+      background: linear-gradient(160deg, var(--bg-card) 0%, #070b18 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                  border-color 0.3s ease,
+                  box-shadow 0.3s ease;
+      animation: cardFadeUp 0.45s ease backwards;
+    }
+
+    .preset-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0, 0, 213, 0.25), rgba(0, 122, 255, 0.15));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .preset-card:hover {
+      transform: translateY(-5px) scale(1.015);
+      border-color: var(--primary-bright);
+      box-shadow: 0 14px 32px rgba(0, 0, 213, 0.35), 0 0 20px rgba(0, 122, 255, 0.25);
+    }
+
+    .preset-card:hover::before {
+      opacity: 1;
+    }
+
+    .preset-card:active {
+      transform: scale(0.98);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .xml-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, var(--primary-deep), var(--primary-bright));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 6px 18px rgba(0, 122, 255, 0.38);
+      flex-shrink: 0;
+    }
+
+    .ext-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: rgba(0, 122, 255, 0.14);
+      color: #66b2ff;
+      border: 1px solid rgba(0, 122, 255, 0.28);
+    }
+
+    .file-title {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--text-main);
+      word-break: break-word;
+      line-height: 1.4;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-footer {
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-filename {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 72%;
+    }
+
+    .tap-hint {
+      color: var(--primary-bright);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+      transition: transform 0.25s ease;
+    }
+
+    .preset-card:hover .tap-hint {
+      transform: translateX(3px);
+    }
+
+    /* Popup / Modal Overlay */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 4, 12, 0.82);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal-backdrop.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 460px;
+      background: linear-gradient(165deg, #0d142b 0%, #060914 100%);
+      border: 1px solid rgba(0, 122, 255, 0.45);
+      border-radius: 22px;
+      padding: 26px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(0, 0, 213, 0.45);
+      position: relative;
+      transform: scale(0.84) translateY(24px);
+      opacity: 0;
+      transition: transform 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                  opacity 0.28s ease;
+    }
+
+    .modal-backdrop.active .modal-card {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background: rgba(0, 122, 255, 0.25);
+      color: #fff;
+      border-color: var(--primary-bright);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+      padding-right: 32px;
+    }
+
+    .modal-badge-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 15px;
+      background: linear-gradient(135deg, var(--primary-deep), var(--primary-bright));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(0, 122, 255, 0.45);
+      flex-shrink: 0;
+    }
+
+    .modal-header h2 {
+      font-size: 1.12rem;
+      font-weight: 700;
+      word-break: break-word;
+      line-height: 1.35;
+      color: #fff;
+    }
+
+    .modal-header span {
+      display: block;
+      font-size: 0.8rem;
+      color: #6ab4ff;
+      margin-top: 3px;
+    }
+
+    /* Info Box inside Modal */
+    .info-list {
+      background: rgba(5, 8, 18, 0.75);
+      border: 1px solid rgba(0, 122, 255, 0.2);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      margin-bottom: 22px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.88rem;
+      padding-bottom: 9px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .info-row:last-child {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .info-value {
+      color: var(--text-main);
+      font-weight: 700;
+      text-align: right;
+      word-break: break-all;
+    }
+
+    .info-value.highlight {
+      color: #5cb3ff;
+    }
+
+    /* Download Button */
+    .btn-download {
+      width: 100%;
+      padding: 15px 20px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--primary-deep) 0%, var(--primary-bright) 100%);
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 10px 28px rgba(0, 122, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+    }
+
+    .btn-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 34px rgba(0, 122, 255, 0.6);
+      filter: brightness(1.08);
+    }
+
+    .btn-download:active {
+      transform: scale(0.98);
+    }
+
+    .btn-download:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      margin-top: 14px;
+      padding: 11px 18px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary-deep), var(--primary-bright));
+      color: #fff;
+      border: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 6px 20px rgba(0, 122, 255, 0.35);
+    }
+
+    .status-note {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 48px 20px;
+      background: var(--bg-card);
+      border: 1px dashed var(--border-subtle);
+      border-radius: var(--radius-lg);
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.85); }
+    }
+
+    @keyframes cardFadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge"><span class="dot"></span> Downloader Preset</div>
+    <h1>Alight Motion XML Presets</h1>
+    <p>Otomatis membaca file berurutan <code>preset_1.xml</code>, <code>preset_2.xml</code>, dan seterusnya di folder ini. Klik preset untuk melihat detail ukuran &amp; unduh sesuai nama aslinya.</p>
+  </header>
+
+  <section class="controls">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="searchInput" placeholder="Cari preset (misal: preset_1, preset_12)..." autocomplete="off" />
+    </div>
+    <div class="counter-pill">Total Preset: <span id="presetCount">0</span></div>
+  </section>
+
+  <main>
+    <div class="preset-grid" id="presetGrid">
+      <div class="empty-state">
+        <span class="spinner"></span><br /><br />
+        Memindai <code>preset_1.xml</code>, <code>preset_2.xml</code>, dst...
+      </div>
+    </div>
+  </main>
+
+  <!-- Popup Info Modal -->
+  <div class="modal-backdrop" id="infoModal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true">
+      <button class="modal-close" id="closeModalBtn" title="Tutup">&times;</button>
+
+      <div class="modal-header">
+        <div class="modal-badge-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <polyline points="10 13 8 15 10 17"></polyline>
+            <polyline points="14 13 16 15 14 17"></polyline>
+          </svg>
+        </div>
+        <div>
+          <h2 id="modalFileName">preset_1.xml</h2>
+          <span>Alight Motion Project XML</span>
+        </div>
+      </div>
+
+      <div class="info-list">
+        <div class="info-row">
+          <span class="info-label">Nama File Asli</span>
+          <span class="info-value highlight" id="infoOriginalName">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Ukuran File</span>
+          <span class="info-value" id="infoFileSize">Memuat...</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Format &amp; Tipe</span>
+          <span class="info-value" id="infoFileType">application/xml (.xml)</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Resolusi &amp; FPS</span>
+          <span class="info-value" id="infoResolution">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Jumlah Layer / Efek</span>
+          <span class="info-value" id="infoLayers">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Lokasi Sumber</span>
+          <span class="info-value" id="infoPath">./ (1 Folder)</span>
+        </div>
+      </div>
+
+      <button class="btn-download" id="downloadBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span id="downloadBtnText">Download XML</span>
+      </button>
+      <div class="status-note" id="statusNote">File akan diunduh langsung dengan nama aslinya</div>
+    </div>
+  </div>
+
+  <!-- Input tersembunyi khusus jika dibuka offline via file:// -->
+  <input type="file" id="localFolderPicker" webkitdirectory directory multiple accept=".xml" style="display:none" />
+
+  <footer>
+    © Thoni Project Corporation 2026
+  </footer>
+
+  <script>
+    const FILE_PREFIX = 'preset_';
+    const FILE_EXT = '.xml';
+    const BATCH_SIZE = 8; // Jumlah pengecekan paralel per gelombang agar cepat & tidak membebani browser
+
+    let detectedXmlFiles = [];
+    let isScanning = false;
+    const fileCache = new Map(); // Menyimpan { blob, size, resolution, layers }
+
+    const presetGrid = document.getElementById('presetGrid');
+    const searchInput = document.getElementById('searchInput');
+    const presetCount = document.getElementById('presetCount');
+    const localFolderPicker = document.getElementById('localFolderPicker');
+
+    // Modal elements
+    const infoModal = document.getElementById('infoModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const modalFileName = document.getElementById('modalFileName');
+    const infoOriginalName = document.getElementById('infoOriginalName');
+    const infoFileSize = document.getElementById('infoFileSize');
+    const infoResolution = document.getElementById('infoResolution');
+    const infoLayers = document.getElementById('infoLayers');
+    const infoPath = document.getElementById('infoPath');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const downloadBtnText = document.getElementById('downloadBtnText');
+    const statusNote = document.getElementById('statusNote');
+
+    let currentSelectedFile = null;
+    let currentBlobUrl = null;
+
+    function formatBytes(bytes) {
+      if (bytes === undefined || bytes === null || isNaN(bytes)) return 'Tidak diketahui';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function naturalSort(a, b) {
+      return a.localeCompare(b, 'id', { numeric: true, sensitivity: 'base' });
+    }
+
+    function parseAlightMotionXML(xmlText) {
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(xmlText, 'application/xml');
+        if (doc.querySelector('parsererror')) {
+          return { resolution: 'XML Custom', layers: 'Tidak terdeteksi' };
+        }
+
+        const scene = doc.querySelector('scene');
+        const width = scene?.getAttribute('width');
+        const height = scene?.getAttribute('height');
+        const fps = scene?.getAttribute('fps');
+
+        const layers = doc.querySelectorAll('layer, shape, text, media, camera, nullobj').length;
+        const effects = doc.querySelectorAll('effect').length;
+
+        const resText = (width && height)
+          ? `${width}x${height}${fps ? ' @ ' + fps + ' FPS' : ''}`
+          : (fps ? `${fps} FPS` : 'Standar AM');
+
+        const layerText = layers > 0
+          ? `${layers} Layer / ${effects} Efek`
+          : `${doc.getElementsByTagName('*').length} Node XML`;
+
+        return { resolution: resText, layers: layerText };
+      } catch (e) {
+        return { resolution: 'Standar AM', layers: '-' };
+      }
+    }
+
+    // Cek keberadaan 1 file preset_N.xml
+    async function checkFileExists(fileName) {
+      try {
+        // Coba HEAD terlebih dahulu agar hemat kuota
+        let res = await fetch(`./${fileName}`, { method: 'HEAD', cache: 'no-store' });
+        if (res.status === 405 || res.status === 501) {
+          // Fallback jika server lokal tidak mendukung HEAD
+          res = await fetch(`./${fileName}`, { method: 'GET', cache: 'no-store' });
+        }
+        return res.ok;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    /**
+     * Memindai berurutan: preset_1.xml, preset_2.xml, preset_3.xml, ... sampai tidak terbatas
+     * Berhenti otomatis begitu menemui nomor file yang tidak ada (404).
+     */
+    async function scanSequentialPresets() {
+      if (window.location.protocol === 'file:') {
+        isScanning = false;
+        renderPresets();
+        return;
+      }
+
+      isScanning = true;
+      detectedXmlFiles = [];
+      let index = 1;
+      let keepScanning = true;
+
+      while (keepScanning) {
+        const batchIndices = [];
+        for (let i = 0; i < BATCH_SIZE; i++) {
+          batchIndices.push(index + i);
+        }
+
+        const results = await Promise.all(
+          batchIndices.map(async (num) => {
+            const fileName = `${FILE_PREFIX}${num}${FILE_EXT}`;
+            const exists = await checkFileExists(fileName);
+            return { num, fileName, exists };
+          })
+        );
+
+        let batchAdded = false;
+        for (const item of results) {
+          if (item.exists) {
+            detectedXmlFiles.push(item.fileName);
+            batchAdded = true;
+          } else {
+            // Hentikan pemindaian tepat pada nomor urut pertama yang tidak ditemukan
+            keepScanning = false;
+            break;
+          }
+        }
+
+        if (batchAdded) {
+          detectedXmlFiles.sort(naturalSort);
+          renderPresets(searchInput.value);
+        }
+
+        index += BATCH_SIZE;
+      }
+
+      isScanning = false;
+      renderPresets(searchInput.value);
+    }
+
+    // Mode fallback khusus jika file HTML dibuka langsung offline dari penyimpanan HP/PC (file://)
+    localFolderPicker.addEventListener('change', (e) => {
+      const files = Array.from(e.target.files || []);
+      const presetPattern = /^preset_\d+\.xml$/i;
+      const xmls = files.filter(f => presetPattern.test(f.name));
+      fileCache.clear();
+
+      xmls.forEach(file => {
+        fileCache.set(file.name, {
+          localFileObj: file,
+          size: file.size,
+          resolution: null,
+          layers: null
+        });
+      });
+
+      detectedXmlFiles = xmls.map(f => f.name).sort(naturalSort);
+      renderPresets(searchInput.value);
+    });
+
+    function renderPresets(filter = '') {
+      const keyword = filter.trim().toLowerCase();
+      const filtered = detectedXmlFiles.filter(name => name.toLowerCase().includes(keyword));
+
+      presetCount.textContent = isScanning
+        ? `${filtered.length} (Memindai...)`
+        : filtered.length;
+
+      presetGrid.innerHTML = '';
+
+      if (detectedXmlFiles.length === 0 && isScanning) {
+        presetGrid.innerHTML = `
+          <div class="empty-state">
+            <span class="spinner"></span><br /><br />
+            Memindai <code>preset_1.xml</code>, <code>preset_2.xml</code>, dan seterusnya...
+          </div>
+        `;
+        return;
+      }
+
+      if (detectedXmlFiles.length === 0 && !isScanning) {
+        const isFileProtocol = window.location.protocol === 'file:';
+        presetGrid.innerHTML = `
+          <div class="empty-state">
+            ${isFileProtocol
+              ? `Anda membuka file ini secara offline (<code>file://</code>).<br/>
+                 Di GitHub Pages / hosting, file <code>preset_1.xml</code>, <code>preset_2.xml</code>, dst akan otomatis terbaca.<br/>
+                 Untuk pratinjau offline sekarang, pilih folder penyimpanan preset Anda:<br/>
+                 <button class="btn-secondary" onclick="document.getElementById('localFolderPicker').click()">
+                   Pilih Folder XML Lokal
+                 </button>`
+              : `File <code>preset_1.xml</code> tidak ditemukan di folder ini.<br/>
+                 Pastikan file diunggah di folder yang sama dengan nama berurutan: <code>preset_1.xml</code>, <code>preset_2.xml</code>, dst.`
+            }
+          </div>
+        `;
+        return;
+      }
+
+      if (filtered.length === 0) {
+        presetGrid.innerHTML = `
+          <div class="empty-state">
+            Tidak ada preset yang cocok dengan pencarian "<strong>${filter}</strong>".
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach((fileName, index) => {
+        const card = document.createElement('div');
+        card.className = 'preset-card';
+        card.style.animationDelay = `${Math.min(index * 0.03, 0.35)}s`;
+
+        const numberMatch = fileName.match(/(\d+)/);
+        const presetNumber = numberMatch ? `#${numberMatch[1]}` : 'XML';
+        const displayTitle = fileName.replace(/\.xml$/i, '');
+
+        card.innerHTML = `
+          <div class="card-top">
+            <div class="xml-icon">${presetNumber}</div>
+            <span class="ext-tag">.xml</span>
+          </div>
+          <div class="file-title">${displayTitle}</div>
+          <div class="card-footer">
+            <span class="card-filename" title="${fileName}">${fileName}</span>
+            <span class="tap-hint">Info &rarr;</span>
+          </div>
+        `;
+
+        card.addEventListener('click', () => openPresetModal(fileName));
+        presetGrid.appendChild(card);
+      });
+    }
+
+    async function openPresetModal(fileName) {
+      currentSelectedFile = fileName;
+
+      modalFileName.textContent = fileName;
+      infoOriginalName.textContent = fileName;
+      infoFileSize.innerHTML = '<span class="spinner"></span> Membaca file...';
+      infoResolution.textContent = 'Menganalisis...';
+      infoLayers.textContent = 'Menganalisis...';
+      infoPath.textContent = `./${fileName}`;
+      downloadBtn.disabled = true;
+      downloadBtnText.textContent = 'Menyiapkan File...';
+      statusNote.textContent = 'Mengambil file XML langsung dari folder...';
+
+      infoModal.classList.add('active');
+      infoModal.setAttribute('aria-hidden', 'false');
+
+      try {
+        let fileData = fileCache.get(fileName);
+
+        // Jika berasal dari folder picker lokal offline
+        if (fileData && fileData.localFileObj && !fileData.blob) {
+          const text = await fileData.localFileObj.text();
+          const meta = parseAlightMotionXML(text);
+          fileData = {
+            blob: new Blob([text], { type: 'application/xml' }),
+            size: fileData.localFileObj.size,
+            resolution: meta.resolution,
+            layers: meta.layers
+          };
+          fileCache.set(fileName, fileData);
+        }
+
+        // Ambil langsung dari 1 folder yang sama ("./" + fileName)
+        if (!fileData) {
+          const response = await fetch(`./${encodeURIComponent(fileName)}`);
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const blob = await response.blob();
+          const text = await blob.text();
+          const meta = parseAlightMotionXML(text);
+
+          fileData = {
+            blob: new Blob([text], { type: 'application/xml' }),
+            size: blob.size,
+            resolution: meta.resolution,
+            layers: meta.layers
+          };
+          fileCache.set(fileName, fileData);
+        }
+
+        if (currentSelectedFile !== fileName) return;
+
+        infoFileSize.textContent = formatBytes(fileData.size);
+        infoResolution.textContent = fileData.resolution;
+        infoLayers.textContent = fileData.layers;
+
+        if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+        currentBlobUrl = URL.createObjectURL(fileData.blob);
+
+        downloadBtn.disabled = false;
+        downloadBtnText.textContent = `Download (${formatBytes(fileData.size)})`;
+        statusNote.textContent = 'Siap diunduh • Nama file asli dipertahankan';
+
+      } catch (err) {
+        if (currentSelectedFile !== fileName) return;
+        infoFileSize.textContent = 'Gagal memuat';
+        infoResolution.textContent = '-';
+        infoLayers.textContent = '-';
+        downloadBtn.disabled = true;
+        downloadBtnText.textContent = 'File Tidak Tersedia';
+        statusNote.textContent = `Gagal membaca "${fileName}" dari folder saat ini.`;
+      }
+    }
+
+    function closeModal() {
+      infoModal.classList.remove('active');
+      infoModal.setAttribute('aria-hidden', 'true');
+      currentSelectedFile = null;
+    }
+
+    downloadBtn.addEventListener('click', () => {
+      if (!currentSelectedFile || !currentBlobUrl) return;
+
+      const a = document.createElement('a');
+      a.href = currentBlobUrl;
+      a.download = currentSelectedFile; // Nama file unduhan mengikuti nama aslinya persis
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      downloadBtnText.textContent = 'Berhasil Diunduh!';
+      setTimeout(() => {
+        if (currentSelectedFile) {
+          downloadBtnText.textContent = 'Download XML Lagi';
+        }
+      }, 1800);
+    });
+
+    closeModalBtn.addEventListener('click', closeModal);
+    infoModal.addEventListener('click', (e) => {
+      if (e.target === infoModal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && infoModal.classList.contains('active')) closeModal();
+    });
+
+    searchInput.addEventListener('input', (e) => renderPresets(e.target.value));
+
+    // Mulai pemindaian preset_1.xml, preset_2.xml, dst
+    scanSequentialPresets();
+  </script>
+</body>
+</html>
